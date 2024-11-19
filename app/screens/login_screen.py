@@ -11,7 +11,7 @@ class LoginScreen:
         master.configure(bg='lightgray')
 
         # Logo
-        logo = tk.Label(master, text="Company Logo", bg='lightgray', font=("Arial", 24))
+        logo = tk.Label(master, text="SubbotinNY", bg='lightgray', font=("Arial", 24))
         logo.pack(pady=10)
 
         # Login Input
