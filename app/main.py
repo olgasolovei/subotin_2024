@@ -7,11 +7,14 @@ from screens.site_crane_add import SiteCraneAddScreen
 from screens.user_profile import UserProfileScreen
 from screens.password_change import PasswordChangeScreen
 from screens.password_recovery import PasswordRecoveryScreen
+import os
 
 class MainApplication:
     def __init__(self, root):
         self.root = root
         self.root.title("Weather Risk Management App")
+        self.user_email = None  # Store user email here
+        self.risk_notification_screen = None  # Initialize reference to RiskNotificationScreen
         self.show_login_screen()
 
     def show_login_screen(self):
@@ -20,15 +23,32 @@ class MainApplication:
 
     def show_main_screen(self):
         self.clear_screen()
-        self.main_screen = MainScreen(self.root, self.show_weather_forecast, self.show_user_profile, self.show_risk_notification)
+        self.main_screen = MainScreen(
+            self.root,
+            self.show_weather_forecast,
+            self.show_user_profile,
+            self.show_risk_notification,
+            self.show_site_crane_add
+        )
 
     def show_weather_forecast(self):
         self.clear_screen()
-        self.weather_forecast_screen = WeatherForecastScreen(self.root, self.show_main_screen)
+        # Ensure risk_notification_screen is initialized
+        if self.risk_notification_screen is None:
+            self.risk_notification_screen = RiskNotificationScreen(self.root, self.show_main_screen)
+
+        # Pass the initialized RiskNotificationScreen instance to WeatherForecastScreen
+        # This allows WeatherForecastScreen to access the email stored in recipient_email.txt
+        self.weather_forecast_screen = WeatherForecastScreen(self.root, self.show_main_screen, self.risk_notification_screen)
 
     def show_risk_notification(self):
         self.clear_screen()
-        self.risk_notification_screen = RiskNotificationScreen(self.root, self.show_main_screen)
+        # Initialize RiskNotificationScreen if not already done and display it
+        if self.risk_notification_screen is None:
+            self.risk_notification_screen = RiskNotificationScreen(self.root, self.show_main_screen)
+        else:
+            # Show the already created RiskNotificationScreen
+            self.risk_notification_screen.master.lift()
 
     def show_site_crane_add(self):
         self.clear_screen()
@@ -36,7 +56,10 @@ class MainApplication:
 
     def show_user_profile(self):
         self.clear_screen()
-        self.user_profile_screen = UserProfileScreen(self.root, self.show_main_screen)
+        self.user_profile_screen = UserProfileScreen(self.root, self.set_user_email, self.show_main_screen)
+
+    def set_user_email(self, email):
+        self.user_email = email  # Store email in MainApplication
 
     def show_password_change(self):
         self.clear_screen()
@@ -49,26 +72,6 @@ class MainApplication:
     def clear_screen(self):
         for widget in self.root.winfo_children():
             widget.destroy()
-
-class MainScreen:
-    def __init__(self, master, show_weather_forecast, show_user_profile, show_risk_notification):
-        self.master = master
-
-        # Main Screen Title
-        self.label = tk.Label(master, text="Main Screen", font=("Arial", 24))
-        self.label.pack(pady=10)
-
-        # Weather Forecast Button
-        self.weather_button = tk.Button(master, text="Weather Forecast", command=show_weather_forecast)
-        self.weather_button.pack(pady=5)
-
-        # Risk Notification Button
-        self.risk_notification_button = tk.Button(master, text="Risk Notification", command=show_risk_notification)
-        self.risk_notification_button.pack(pady=5)
-
-        # User Profile Button
-        self.user_profile_button = tk.Button(master, text="User  Profile", command=show_user_profile)
-        self.user_profile_button.pack(pady=5)
 
 if __name__ == "__main__":
     root = tk.Tk()
